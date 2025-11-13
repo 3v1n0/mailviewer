@@ -74,6 +74,8 @@ mod imp {
     #[template_child]
     pub sheet: TemplateChild<adw::BottomSheet>,
     #[template_child]
+    pub content_box: TemplateChild<gtk4::Box>,
+    #[template_child]
     pub attachments_clamp: TemplateChild<adw::Clamp>,
     //
     pub scrolled_window: ScrolledWindow,
@@ -103,6 +105,7 @@ mod imp {
         stack: TemplateChild::default(),
         pull_label: TemplateChild::default(),
         attachments_clamp: TemplateChild::default(),
+        content_box: TemplateChild::default(),
         sheet: TemplateChild::default(),
         settings: OnceCell::new(),
         service: MailService::new(),
@@ -603,6 +606,8 @@ impl MailViewerWindow {
     log::debug!("open_file({:?})", file.peek_path().unwrap_or_default());
 
     self.on_show_text(true);
+    self.imp().content_box.get().set_sensitive(false);
+    self.imp().sheet.get().set_open(false);
 
     match self.imp().service.open_message(&file).await {
       Ok(_) => {
@@ -616,7 +621,9 @@ impl MailViewerWindow {
           true,
         );
       }
-    }
+    };
+
+    self.imp().content_box.get().set_sensitive(true);
   }
 
   pub fn display_message(&self) {
